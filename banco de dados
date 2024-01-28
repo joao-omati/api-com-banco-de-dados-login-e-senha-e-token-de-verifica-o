@@ -1,0 +1,42 @@
+from flask import Flask #api
+from flask_sqlalchemy import SQLAlchemy #banco de dados
+
+#criar um API Flask
+app = Flask(__name__)
+#Criar uma instancia de SQLAlchemy
+app.config["SECRET_KEY"] = "BATATA" #gerar um acesso de autenticação unico que funciona so na aplicação,
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blogg.db" #definindo onde esta localizado o banco de dados
+
+db = SQLAlchemy(app)
+db:SQLAlchemy
+#definir a estrutura da tabela postagem
+#id_postagem, titulo, autor
+class Postagem(db.Model):
+    __tablename__ = "postagem"
+    id_postagem = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String)
+    #relacionamento de postagem com autor
+    id_autor = db.Column(db.Integer,db.ForeignKey("autor.id_autor")) #relacionamento de postagem com autor
+    
+#id_autor, nome, email, senha, admin, postagens
+class Autor(db.Model):
+    __tablename__ = "autor"
+    id_autor = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String)
+    email = db.Column(db.String)
+    senha = db.Column(db.String)
+    admin = db.Column(db.Boolean)
+    postagens = db.relationship("Postagem")
+#executar o comando pra criar o banco de dados
+def inicializar_banco():    
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+
+#criar usuarios administradores
+        autor = Autor(nome="Jhonatan",email="jhonatan@gmail.com",senha="12346",admin=True)
+        db.session.add(autor)
+        db.session.commit()
+
+if __name__ == "__main__":
+    inicializar_banco()
