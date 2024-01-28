@@ -1,0 +1,201 @@
+#nosso 1 API - FLASK E DJANGO
+#FLASK & FLASK RESTFUL
+#FLASK = mais simples
+from flask import Flask, requests, sjonify, make_response
+from estrutura_banco_de_dados import Autor,Postagem, app, db
+import json
+import jwt
+from datetime import datetime,timedelta
+#rota padrão = informação recebida na url basse  GET htttp://localhost:5000
+
+def token_obrigatorio(f):
+    @wraps(f)
+    def decorated(*args,**kwargs)
+        token = None
+    #verificar se um token foi enviado
+        if "x-acess-token" in request.headers:
+            request.headers["x-access-token"]
+        if not token:
+            return jsonify({"mensaggem": "token nao foi incluido"},401)
+        #se temos um token,validar acesso consultando o BD
+        try:
+            resultado = jwt.decode(token,app.config["SECRET KEY"],algorithms=["HS256"])
+            autor =Autor.query.filter_by(id_autor=resultado["id_autor"]).first()
+        except:
+            return jsonify({"mensagem": "token é invalido"},401)
+        return f(autor,*args,**kwargs)
+    return decorated
+
+@app.route("/login")
+def login():
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        return make_response("login invalido",401,{"WWW-Authenticate": "Basic realm="Loggin obrigatorio""})
+    usuario = Autor.query.filter_by(nome=auth.username).first()
+    if not usuario:
+        return return make_response("login invalido",401,{"WWW-Authentic": "Basic realm="Loggin obrigatorio""})
+    if auth.password == usuario.senha:
+        token = jwt.encode({"id_autor":usuario.id_autor,"exp":datetime.utcnow() + timedelta
+                    (minutes=30)},app.config["SECRET_KEY"])
+        return jsonify({"token":token})
+    return make_response("login invalido", 401, {"WWW-Authenticate": "basic realm="login obrigatorio""})
+
+
+@app.route("/")
+def obter_postagens():
+    return jsonify(postagens)
+
+app.run(port=5000,host= "localhost",debug=True)
+#vai sair tudo bonitinho quando voce arrumar a porra do github
+
+#rota padrão = informação recebida na url basse - GET htttp://localhost:5000
+@app.route("/")
+def obter_postagens():
+    return jsonify(postagens)
+#GET com id  - htttp://localhost:5000/1
+@app.route('/posts', methods=['GET'])
+def get_all_posts():
+    posts = list(map(lambda x: {'id': x.id, 'title': x.title, 'author': x.id_author}, Post.query.all()))
+
+    return jsonify({'posts': posts}), 200
+
+@app.route('/posts/', methods=['GET'])
+def get_posts_by_id(id: int = None):
+    post = Post.query.filter_by(id=id).first()
+
+    if not post:
+        return jsonify('Post Not Found'), 404
+    
+    return jsonify({'post': {'id': post.id, 'title': post.title, 'author': post.id_author}}), 200
+    
+    
+@app.route('/posts', methods=['POST'])
+def create_new_post():
+    try:
+        body = request.get_json()
+
+        title = body['title']
+        id_author = body['id_author']
+
+        post = Post(title=title, id_author=id_author)
+
+        db.session.add(post)
+        db.session.commit()
+    
+        return jsonify({'message': 'Post was successfully create'}), 201
+    except:
+        return jsonify('Missing parameter(s) for Post creation'), 404
+
+@app.route('/posts/', methods=['PUT'])
+def update_post_by_id(id: int = None):
+    post = Post.query.filter_by(id=id).first()
+
+    if not post:
+        return jsonify('Post Not Found'), 404
+    
+    body = request.get_json()
+
+    try:
+        if body['title']:
+            post.title = body['title']
+    except:
+        pass
+
+    try:
+        if body['id_author']:
+            post.id_author = body['id_author']
+    except:
+        pass
+
+    db.session.commit()
+
+    return jsonify({'message': 'Post was successfully update'}), 201 
+    
+@app.route('/posts/', methods=['DELETE'])
+def delete_post_by_id(id: int = None):
+    post = Post.query.filter_by(id=id).first()
+
+    if not post:
+        return jsonify('Post Not Found'), 404
+    
+    db.session.delete(post)
+    db.session.commit()
+
+    return jsonify({'message': 'Post was successfully delete'}), 200
+
+@app.route("/autores")
+def obter_autores():
+    autores = Autor.query.all()
+    lista_de_autores = []
+    for autor in autores:
+        autor_atual = {}
+        autor_atual["id_autor"] = autor.id_autor
+        autor_atual["nome"] = autor.nome
+        autor_atual["email"] = autor.email
+        lista_de_autores.append(autor_atual)
+
+    return jsonify({"autores":lista_de_autores})
+
+@app.route("/autores/<int:id_autor>",methods=["GET"])
+def obter_ator_por_id(id_autor):
+    autor = Autor.query.filter_by(id_author=id_autor).first
+    if not Autor:
+        return jsonify(f"Autor não encontrado")
+    autor_atual = {}
+    autor_atual["id_autor"] = autor.id_autor
+    autor_atual["nome"] = autor.nome
+    autor_atual["email"] = autor.email
+
+    return jsonify({"autor": autor_atual})
+
+@app.route("/autores",methods=["POST"])    
+def novo_autor(id_autor):
+    print("deu merda")
+    novo_autor = request.get_json()
+    autor = Autor(nome=novo_autor["nome"],senha=novo_autor["senha"],
+                  email=novo_autor["email"])
+    db.session.add(autor)
+    db.session.commit()
+
+    return jsonify({"mensagem":"usuario criado com sucesso", 200})
+
+
+@app.route("/autores/<int:id_autor>",methods=["PUT"])
+def alterar_autor(id_autor):
+    autor= Autor.query.filter_by(id_autor=id_autor).first()
+    try:
+        if not autor:
+            return jsonify({"mensagem":"esse usuario não foi encontrado"})
+    except:
+        pass
+    try:
+        if usuario_a_alterar["nome"]:
+            autor.nome = usuario_a_alterar["nome"]
+    except:
+        pass
+    try:
+        if usuario_a_alterar["email"]:
+            autor.nome = usuario_a_alterar["email"]
+    except:
+        pass
+    try:
+        if usuario_a_alterar["senha"]:
+            autor.nome = usuario_a_alterar["senha"]
+    except:
+        pass
+    db.session.commit()
+    return jsonify({"mensagem":"usuario alterado com sucesso"})
+
+@app.route("/autores/<int:id_autor",methods=["DELETE"])
+def excluir_autor(id_autor):
+    autor_existente = Autor.query.filter_by(id_autor=id_autor).first()
+    if not autor_existente:
+        return jsonify({"mensagegm":"este autor não foi encontrado"})
+    db.session.delete(autor_existente)
+    db.session.commit()
+
+    return jsonify({"mensagem":"autor excluido com sucesso"}, 401)
+
+           
+
+app.run(port=5000,host= "localhost",debug=True)
