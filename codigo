@@ -1,7 +1,7 @@
 #nosso 1 API - FLASK E DJANGO
 #FLASK & FLASK RESTFUL
 #FLASK = mais simples
-from flask import Flask, requests, sjonify, make_response
+from flask import Flask, requests, jsonify, make_response
 from estrutura_banco_de_dados import Autor,Postagem, app, db
 import json
 import jwt
