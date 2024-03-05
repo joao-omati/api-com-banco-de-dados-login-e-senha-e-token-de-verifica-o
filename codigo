@@ -10,7 +10,7 @@ from datetime import datetime,timedelta
 
 def token_obrigatorio(f):
     @wraps(f)
-    def decorated(*args,**kwargs)
+    def decorated(*args,**kwargs):
         token = None
     #verificar se um token foi enviado
         if "x-acess-token" in request.headers:
