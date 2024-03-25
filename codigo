@@ -1,4 +1,4 @@
-#nosso 1 API - FLASK E DJANGO
+#nosso 1 API - FLASK E DJANG
 #FLASK & FLASK RESTFUL
 #FLASK = mais simples
 from flask import Flask, requests, jsonify, make_response
